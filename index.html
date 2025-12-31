@@ -44,8 +44,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="dob">Ngày tháng năm sinh</label>
-                    <input type="date" id="dob">
+                    <label>Ngày sinh (Ngày / Tháng / Năm)</label>
+                    <div class="date-group" style="display: flex; gap: 10px;">
+                        <input type="number" id="dobDay" placeholder="Ngày" min="1" max="31" class="date-input"
+                            style="flex: 1;">
+                        <input type="number" id="dobMonth" placeholder="Tháng" min="1" max="12" class="date-input"
+                            style="flex: 1;">
+                        <input type="number" id="dobYear" placeholder="Năm" min="1950" max="2025" class="date-input"
+                            style="flex: 1.5;">
+                    </div>
                 </div>
 
                 <button id="startBtn" class="magic-btn">

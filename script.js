@@ -20,7 +20,9 @@ const app = {
     cacheDOM() {
         this.dom = {
             fullName: document.getElementById('fullName'),
-            dob: document.getElementById('dob'),
+            dobDay: document.getElementById('dobDay'),
+            dobMonth: document.getElementById('dobMonth'),
+            dobYear: document.getElementById('dobYear'),
             startBtn: document.getElementById('startBtn'),
             analyzeBtn: document.getElementById('analyzeBtn'),
             resetBtn: document.getElementById('resetBtn'),
@@ -79,10 +81,18 @@ const app = {
 
     handleStart() {
         const name = this.dom.fullName.value.trim();
-        const dob = this.dom.dob.value;
+        const d = this.dom.dobDay.value;
+        const m = this.dom.dobMonth.value;
+        const y = this.dom.dobYear.value;
 
-        if (!name || !dob) {
+        if (!name || !d || !m || !y) {
             alert('Vui lòng điền đầy đủ Họ Tên và Ngày Sinh để bắt đầu nhé! ✨');
+            return;
+        }
+
+        // Basic Validation
+        if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900 || y > 2026) {
+            alert('Ngày sinh không hợp lệ. Vui lòng kiểm tra lại!');
             return;
         }
 
@@ -102,8 +112,11 @@ const app = {
         // Simulate Thinking Delay
         setTimeout(() => {
             const name = this.dom.fullName.value.trim();
-            const dob = this.dom.dob.value;
-            const analysis = this.generateAnalysis(name, dob, count);
+            const day = parseInt(this.dom.dobDay.value);
+            const month = parseInt(this.dom.dobMonth.value);
+            const year = parseInt(this.dom.dobYear.value);
+
+            const analysis = this.generateAnalysis(name, day, month, year, count);
             this.showResult(analysis);
         }, 2000);
     },
@@ -113,7 +126,9 @@ const app = {
         this.dom.inputCard.classList.remove('hidden');
         this.dom.checklistCard.classList.add('hidden');
         this.dom.fullName.value = '';
-        this.dom.dob.value = '';
+        this.dom.dobDay.value = '';
+        this.dom.dobMonth.value = '';
+        this.dom.dobYear.value = '';
         // Reset checklist
         const items = document.querySelectorAll('.checklist-item');
         items.forEach(item => {
@@ -128,7 +143,8 @@ const app = {
         this.dom.result.classList.add('fade-in');
 
         this.dom.resName.textContent = data.name;
-        this.dom.resZodiac.textContent = data.zodiac.icon + ' ' + data.zodiac.name;
+        // Display Parsed Date to confirm input
+        this.dom.resZodiac.innerHTML = `${data.zodiac.icon} ${data.zodiac.name} <br><span style="font-size: 0.8em; opacity: 0.8">(${data.dateStr})</span>`;
         this.dom.resNumber.textContent = 'Số chủ đạo: ' + data.numerology;
         this.dom.resDescription.innerHTML = data.description;
         this.dom.resGreeting.textContent = data.greeting;
@@ -137,8 +153,11 @@ const app = {
     // --- Core Logic ---
 
     // 1. Calculate Numerology (Life Path Number)
-    calculateNumerology(dobString) {
-        const digits = dobString.replace(/-/g, '').split('').map(Number);
+    calculateNumerology(day, month, year) {
+        // Construct string just for the logic consistency if wanted, or sum directly
+        // Life Path = sum of all digits
+        const fullStr = `${day}${month}${year}`;
+        const digits = fullStr.split('').map(Number);
         const sum = digits.reduce((a, b) => a + b, 0);
 
         const reduceToSingleDigit = (num) => {
@@ -169,15 +188,26 @@ const app = {
     },
 
     // 3. Generators
-    generateAnalysis(name, dobString, checkCount) {
-        const date = new Date(dobString);
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
+    generateAnalysis(name, day, month, year, checkCount) {
+        // Direct assignment, no parsing needed
 
-        const number = this.calculateNumerology(dobString);
+        const number = this.calculateNumerology(day, month, year);
         const zodiac = this.getZodiac(day, month);
 
         // --- Data Corpus ---
+        const traits = {
+            1: "Bạn là người sinh ra để dẫn đầu. Mạnh mẽ, quyết đoán và độc lập.",
+            2: "Bạn sở hữu trực giác tuyệt vời và trái tim nhân hậu.",
+            3: "Bạn là linh hồn của những bữa tiệc! Sự sáng tạo luôn chảy trong bạn.",
+            4: "Sự kiên định và thực tế là sức mạnh của bạn.",
+            5: "Tự do là lẽ sống của bạn. Bạn thích phiêu lưu và ghét sự ràng buộc.",
+            6: "Bạn là người của gia đình. Sự quan tâm và trách nhiệm là điểm tựa của bạn.",
+            7: "Bạn mang trong mình trí tuệ sâu sắc và thích chiêm nghiệm.",
+            8: "Bạn có tố chất kinh doanh và lãnh đạo tài ba.",
+            9: "Bạn có tấm lòng bao dung rộng lớn và sứ mệnh cống hiến.",
+            11: "Bạn có trực giác tâm linh cực kỳ nhạy bén.",
+            22: "Bạn là 'Kiến trúc sư của tương lai' với tầm nhìn xa trông rộng."
+        };
 
         // ZODIAC DATABASE (Expanded - 15+ messages per sign)
         const zodiacMessages = {
@@ -457,6 +487,7 @@ const app = {
             name: name,
             numerology: number,
             zodiac: zodiac,
+            dateStr: `${day}/${month}/${year}`,
             description: fullDescription,
             greeting: greetings[Math.floor(Math.random() * greetings.length)]
         };
