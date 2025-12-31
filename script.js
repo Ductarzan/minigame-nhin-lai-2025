@@ -118,6 +118,25 @@ const app = {
 
             const analysis = this.generateAnalysis(name, day, month, year, count);
             this.showResult(analysis);
+
+            // --- SEND DATA TO GOOGLE SHEET (Fire & Forget) ---
+            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMDvSPOP6Z3gf8fvyTF5vErMGtY1Ln8IA3qmvBHuGdclC8O36pVmzq-iCJIO9ptExr/exec';
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Important for Google Apps Script
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: analysis.name,
+                    dob: analysis.dateStr,
+                    zodiac: analysis.zodiac.name,
+                    checkCount: count,
+                    greeting: analysis.greeting
+                })
+            }).catch(err => console.error('Data Send Error:', err));
+
         }, 2000);
     },
 
